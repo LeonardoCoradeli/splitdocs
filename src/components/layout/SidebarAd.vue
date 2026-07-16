@@ -1,6 +1,22 @@
+<script setup lang="ts">
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  try {
+    ;(adsbygoogle = window.adsbygoogle || []).push({})
+  } catch {}
+})
+</script>
+
 <template>
   <aside class="sidebar-ad">
-    <span class="sidebar-ad__text">Anúncio</span>
+    <ins
+      class="adsbygoogle"
+      style="display:block; width:300px; height:300px"
+      data-ad-client="ca-pub-6961578288811450"
+      data-ad-slot="0000000000"
+      data-ad-format="auto"
+    ></ins>
   </aside>
 </template>
 
@@ -12,10 +28,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.sidebar-ad__text {
-  color: var(--text-muted);
-  font-size: 0.875rem;
 }
 </style>

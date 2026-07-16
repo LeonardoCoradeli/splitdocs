@@ -109,9 +109,13 @@ function onRename(index: number, name: string) {
   </div>
 
   <AppModal :open="showAdModal" title="Anúncio" @close="onAdModalClose">
-    <p style="color: var(--text-muted); text-align: center; padding: 2rem 0;">
-      Anúncio
-    </p>
+    <ins
+      class="adsbygoogle"
+      style="display:block; width:100%; height:250px"
+      data-ad-client="ca-pub-6961578288811450"
+      data-ad-slot="0000000000"
+      data-ad-format="auto"
+    ></ins>
   </AppModal>
 </template>
 
