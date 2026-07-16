@@ -1,0 +1,20 @@
+@import './variables.css';
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-primary);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+
+img, svg { display: block; max-width: 100%; }
+
+button { cursor: pointer; font-family: inherit; }
+
+a { color: var(--accent); text-decoration: none; }

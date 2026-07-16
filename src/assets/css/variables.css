@@ -1,0 +1,16 @@
+:root {
+  --bg-primary: #18181B;
+  --surface: #27272A;
+  --accent: #10B981;
+  --text-main: #F4F4F5;
+  --text-muted: #A1A1AA;
+  --border-radius: 4px;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[data-theme="light"] {
+  --bg-primary: #FAFAFA;
+  --surface: #FFFFFF;
+  --text-main: #18181B;
+  --text-muted: #71717A;
+}
