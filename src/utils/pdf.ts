@@ -10,7 +10,7 @@ export async function extractPages(pdfBytes: ArrayBuffer): Promise<{ text: strin
   }))
 }
 
-export async function createPdfFromPages(pages: { text: string; pageNumber: number }[]): Promise<ArrayBuffer> {
+export async function createPdfFromPages(pages: { text: string; pageNumber: number }[]): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
   const font = await doc.embedFont(StandardFonts.Helvetica)
 
@@ -29,5 +29,5 @@ export async function createPdfFromPages(pages: { text: string; pageNumber: numb
     })
   }
 
-  return await doc.save()
+  return (await doc.save()).buffer as ArrayBuffer
 }

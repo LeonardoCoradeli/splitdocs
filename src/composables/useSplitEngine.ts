@@ -43,7 +43,7 @@ export function useSplitEngine() {
 
     const blocks = parse(parsedFile)
 
-    let parts: Part[]
+    let parts: Part[] = []
 
     switch (criteria.type) {
       case 'bySize':
@@ -61,6 +61,8 @@ export function useSplitEngine() {
       case 'byParts':
         parts = byParts(blocks, criteria.count)
         break
+      default:
+        throw new Error(`Unknown criteria type: ${(criteria as Criteria).type}`)
     }
 
     const baseName = parsedFile.originalName.replace(/\.[^.]+$/, '')

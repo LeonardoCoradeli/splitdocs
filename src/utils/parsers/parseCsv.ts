@@ -39,7 +39,6 @@ export function parseCsv(content: string): Block[] {
 
   if (hasHeader) {
     const headers = parsedLines[0]
-    const maxCols = headers.length
 
     return parsedLines.slice(1).map((row, index) => {
       const obj: Record<string, string> = {}

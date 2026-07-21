@@ -12,7 +12,6 @@ const emit = defineEmits<{
 }>()
 
 const showTextarea = ref(false)
-const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
 watch(() => props.modelValue, (val) => {
   if (val) {
@@ -44,7 +43,6 @@ function onInput(e: Event) {
     </button>
     <textarea
       v-show="showTextarea"
-      ref="textareaRef"
       class="text-paste-area__input"
       placeholder="Cole seu texto aqui..."
       :value="modelValue"

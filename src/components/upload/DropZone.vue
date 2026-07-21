@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import AppButton from '@/components/common/AppButton.vue'
 
 defineProps<{
@@ -9,6 +10,7 @@ const emit = defineEmits<{
   'file-selected': [file: File]
 }>()
 
+const fileInput = ref<HTMLInputElement | null>(null)
 let dragCounter = 0
 
 function onDragOver(e: DragEvent) {
@@ -59,7 +61,7 @@ function onFileInput(e: Event) {
       <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
     </svg>
     <p class="drop-zone__hint">Arraste um arquivo aqui ou clique para selecionar</p>
-    <AppButton variant="secondary" :disabled="disabled" @click="$refs.fileInput?.click()">
+    <AppButton variant="secondary" :disabled="disabled" @click="fileInput?.click()">
       Selecionar arquivo
     </AppButton>
     <input

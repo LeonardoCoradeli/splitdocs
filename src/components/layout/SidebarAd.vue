@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 
+declare global {
+  interface Window {
+    adsbygoogle: unknown[]
+  }
+}
+
 onMounted(() => {
   try {
-    ;(adsbygoogle = window.adsbygoogle || []).push({})
+    ;(window.adsbygoogle = window.adsbygoogle || []).push({})
   } catch {}
 })
 </script>
