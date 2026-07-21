@@ -29,5 +29,5 @@ export async function createPdfFromPages(pages: { text: string; pageNumber: numb
     })
   }
 
-  return (await doc.save()).buffer as ArrayBuffer
+  return new Uint8Array((await doc.save()).buffer)
 }
