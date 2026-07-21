@@ -17,7 +17,7 @@ import { formatMd } from '@/utils/formatters/formatMd'
 import { formatOriginal } from '@/utils/formatters/formatOriginal'
 
 export function useSplitEngine() {
-  function parse(file: ParsedFile): Block[] {
+  async function parse(file: ParsedFile): Promise<Block[]> {
     switch (file.type) {
       case 'txt':
       case 'md':
@@ -32,16 +32,16 @@ export function useSplitEngine() {
       case 'ass':
         return parseAss(file.content as string)
       case 'pdf':
-        return parsePdf(file.content as ArrayBuffer)
+        return await parsePdf(file.content as ArrayBuffer)
       default:
         throw new Error(`No parser available for file type: ${file.type}`)
     }
   }
 
-  function split(parsedFile: ParsedFile, criteria: Criteria, format: OutputFormat): Part[] {
+  async function split(parsedFile: ParsedFile, criteria: Criteria, format: OutputFormat): Promise<Part[]> {
     validateCompatibility(parsedFile.type, criteria)
 
-    const blocks = parse(parsedFile)
+    const blocks = await parse(parsedFile)
 
     let parts: Part[] = []
 

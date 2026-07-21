@@ -87,7 +87,7 @@ function onExampleClick() {
   hasFile.value = true
 }
 
-function onPreview() {
+async function onPreview() {
   if (!criteria.value || !fileType.value) return
 
   previewLoading.value = true
@@ -101,7 +101,7 @@ function onPreview() {
       blocks: []
     }
 
-    lastParts = split(parsedFile, criteria.value, outputFormat.value)
+    lastParts = await split(parsedFile, criteria.value, outputFormat.value)
 
     previewParts.value = lastParts.map(p => ({
       index: p.index,
