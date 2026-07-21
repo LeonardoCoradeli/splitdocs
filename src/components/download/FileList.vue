@@ -23,7 +23,7 @@ const emit = defineEmits<{
         :key="i"
         :part="part"
         :index="i"
-        @rename="emit('rename', $event)"
+        @rename="(idx: number, n: string) => emit('rename', idx, n)"
       />
     </div>
   </div>
