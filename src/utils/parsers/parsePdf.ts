@@ -3,20 +3,17 @@ import { PDFDocument } from 'pdf-lib'
 
 export async function parsePdf(content: ArrayBuffer): Promise<Block[]> {
   const doc = await PDFDocument.load(content)
+  const count = doc.getPageCount()
 
-  if (doc.getPageCount() === 0) return []
+  if (count === 0) return []
 
   const blocks: Block[] = []
-  const pages = doc.getPages()
 
-  for (let i = 0; i < pages.length; i++) {
-    const page = pages[i]
-    const text = (page as unknown as { getText: () => string }).getText?.() ?? ''
-
+  for (let i = 0; i < count; i++) {
     blocks.push({
       index: i,
-      text,
-      metadata: { pageNumber: i + 1 }
+      text: `[Página ${i + 1}]`,
+      metadata: { pageNumber: i + 1, pageIndex: i }
     })
   }
 

@@ -1,8 +1,35 @@
 import type { Part } from '@/types/part'
 import type { Block } from '@/types/file'
+import { splitPdfPages } from '@/utils/pdf'
 
-export function formatOriginal(parts: Part[], originalBlocks?: Block[]): Part[] {
+export async function formatOriginal(
+  parts: Part[],
+  originalBlocks?: Block[],
+  originalContent?: string | ArrayBuffer
+): Promise<Part[]> {
   if (!originalBlocks) return parts
+
+  if (originalContent instanceof ArrayBuffer) {
+    const updatedParts: Part[] = []
+
+    for (const part of parts) {
+      const partBlocks = findBlocksForPart(part, originalBlocks)
+      const pageIndices = partBlocks.map(b => (b.metadata?.pageIndex as number) ?? b.index)
+
+      const pdfBytes = await splitPdfPages(
+        originalContent,
+        pageIndices.length > 0 ? pageIndices : [part.index]
+      )
+
+      updatedParts.push({
+        ...part,
+        content: pdfBytes,
+        size: pdfBytes.byteLength
+      })
+    }
+
+    return updatedParts
+  }
 
   return parts.map(part => {
     const partBlocks = findBlocksForPart(part, originalBlocks)
@@ -39,7 +66,8 @@ export function formatOriginal(parts: Part[], originalBlocks?: Block[]): Part[] 
 }
 
 function findBlocksForPart(part: Part, allBlocks: Block[]): Block[] {
-  const partLines = part.content.split('\n').filter(l => l.length > 0)
+  const contentStr = typeof part.content === 'string' ? part.content : ''
+  const partLines = contentStr.split('\n').filter(l => l.length > 0)
   if (partLines.length === 0) return []
 
   const firstLine = partLines[0]

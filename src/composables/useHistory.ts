@@ -3,10 +3,35 @@ import type { HistoryEntry } from '@/types/history'
 const STORAGE_KEY = 'splitdocs-history'
 const MAX_ENTRIES = 20
 
+let memoryStore: Record<string, string> = {}
+
+function getStorage() {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('__storage_test__', '1')
+      window.localStorage.removeItem('__storage_test__')
+      return window.localStorage
+    }
+  } catch {}
+
+  return {
+    getItem(key: string) {
+      return memoryStore[key] ?? null
+    },
+    setItem(key: string, value: string) {
+      memoryStore[key] = value
+    },
+    removeItem(key: string) {
+      delete memoryStore[key]
+    }
+  }
+}
+
 export function useHistory() {
   function getEntries(): HistoryEntry[] {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
+      const storage = getStorage()
+      const raw = storage.getItem(STORAGE_KEY)
       return raw ? JSON.parse(raw) : []
     } catch {
       return []
@@ -14,7 +39,8 @@ export function useHistory() {
   }
 
   function saveEntries(entries: HistoryEntry[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
+    const storage = getStorage()
+    storage.setItem(STORAGE_KEY, JSON.stringify(entries))
   }
 
   function addEntry(entry: Omit<HistoryEntry, 'id' | 'date'>): void {
@@ -34,7 +60,8 @@ export function useHistory() {
   }
 
   function clearHistory(): void {
-    localStorage.removeItem(STORAGE_KEY)
+    const storage = getStorage()
+    storage.removeItem(STORAGE_KEY)
   }
 
   return { addEntry, getEntries, clearHistory }

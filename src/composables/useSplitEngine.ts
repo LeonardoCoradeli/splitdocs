@@ -78,7 +78,7 @@ export function useSplitEngine() {
       case 'md':
         return formatMd(parts, blocks)
       case 'original':
-        return formatOriginal(parts, blocks)
+        return await formatOriginal(parts, blocks, parsedFile.content)
       default:
         return parts
     }

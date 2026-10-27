@@ -2,8 +2,12 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHead } from '@vueuse/head'
+import { PDFDocument } from 'pdf-lib'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useSplitEngine } from '@/composables/useSplitEngine'
+import { useFileReader } from '@/composables/useFileReader'
+import { useStats } from '@/composables/useStats'
+import { useHistory } from '@/composables/useHistory'
 import { useSessionStore } from '@/stores/session'
 import type { Criteria, OutputFormat } from '@/types/criteria'
 import type { FileType, ParsedFile } from '@/types/file'
@@ -23,12 +27,15 @@ import PreviewModal from '@/components/preview/PreviewModal.vue'
 const router = useRouter()
 const { handleError } = useErrorHandler()
 const { split } = useSplitEngine()
+const { readFile, readText } = useFileReader()
+const { addEntry } = useHistory()
 const store = useSessionStore()
 
 const hasFile = ref(false)
 const fileName = ref('')
 const fileType = ref<FileType | null>(null)
-const fileContent = ref('')
+const fileContent = ref<string | ArrayBuffer>('')
+const pdfPageCount = ref(0)
 const criteria = ref<Criteria | null>(null)
 const outputFormat = ref<OutputFormat>('original')
 const showPreview = ref(false)
@@ -36,42 +43,41 @@ const previewParts = ref<PartPreview[]>([])
 const previewLoading = ref(false)
 let lastParts: Part[] = []
 
-const words = computed(() => fileContent.value.split(/\s+/).filter(Boolean).length)
-const chars = computed(() => fileContent.value.length)
-const lines = computed(() => fileContent.value.split('\n').length)
+const { words, chars, lines } = useStats(fileContent, pdfPageCount)
 
-function onFileSelected(file: File) {
+const textValue = computed({
+  get: () => (typeof fileContent.value === 'string' ? fileContent.value : ''),
+  set: (val: string) => {
+    fileContent.value = val
+  }
+})
+
+async function onFileSelected(file: File) {
   try {
-    const ext = file.name.split('.').pop()?.toLowerCase() || ''
-    const supported = ['txt', 'md', 'srt', 'vtt', 'ass', 'csv', 'tsv', 'pdf']
-    if (!supported.includes(ext)) {
-      throw new Error('Formato de arquivo não suportado.')
-    }
-    if (file.size > 50 * 1024 * 1024) {
-      throw new Error('Arquivo muito grande. Limite máximo de 50MB.')
+    const fileData = await readFile(file)
+    fileName.value = fileData.name
+    fileType.value = fileData.type
+    fileContent.value = fileData.content
+
+    if (fileData.type === 'pdf') {
+      const doc = await PDFDocument.load(fileData.content as ArrayBuffer)
+      pdfPageCount.value = doc.getPageCount()
+    } else {
+      pdfPageCount.value = 0
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const content = reader.result as string
-      fileContent.value = content
-      fileName.value = file.name
-      fileType.value = ext as FileType
-      hasFile.value = true
-    }
-    reader.onerror = () => {
-      handleError('Erro ao ler o arquivo.')
-    }
-    reader.readAsText(file)
+    hasFile.value = true
   } catch (err) {
     handleError(err)
   }
 }
 
 function onTextPasted(text: string) {
-  fileContent.value = text
-  fileName.value = 'texto_colado.txt'
-  fileType.value = 'txt'
+  const data = readText(text)
+  fileContent.value = data.content
+  fileName.value = data.name
+  fileType.value = data.type
+  pdfPageCount.value = 0
   hasFile.value = true
 }
 
@@ -81,9 +87,12 @@ function onCriteriaChange(c: Criteria, format: OutputFormat) {
 }
 
 function onExampleClick() {
-  fileContent.value = 'Bem-vindo ao SplitDocs. Esta é uma ferramenta para dividir arquivos de texto em múltiplas partes.\n\nVocê pode dividir por número de linhas, palavras, caracteres, ou usar marcadores estruturais como cabeçalhos e linhas em branco. O resultado pode ser baixado em formato original, TXT ou Markdown.\n\nExperimente os diferentes critérios de divisão e veja como o preview mostra cada parte antes de confirmar o download.'
-  fileName.value = 'exemplo.txt'
-  fileType.value = 'txt'
+  const example = 'Bem-vindo ao SplitDocs. Esta é uma ferramenta para dividir arquivos de texto em múltiplas partes.\n\nVocê pode dividir por número de linhas, palavras, caracteres, ou usar marcadores estruturais como cabeçalhos e linhas em branco. O resultado pode ser baixado em formato original, TXT ou Markdown.\n\nExperimente os diferentes critérios de divisão e veja como o preview mostra cada parte antes de confirmar o download.'
+  const data = readText(example)
+  fileContent.value = data.content
+  fileName.value = data.name
+  fileType.value = data.type
+  pdfPageCount.value = 0
   hasFile.value = true
 }
 
@@ -103,13 +112,30 @@ async function onPreview() {
 
     lastParts = await split(parsedFile, criteria.value, outputFormat.value)
 
-    previewParts.value = lastParts.map(p => ({
-      index: p.index,
-      filename: p.filename,
-      firstLine: p.content.split('\n')[0] || '',
-      lastLine: p.content.split('\n').filter(Boolean).pop() || '',
-      totalLines: p.content.split('\n').length
-    }))
+    previewParts.value = lastParts.map(p => {
+      let firstLine = ''
+      let lastLine = ''
+      let totalLines = 1
+
+      if (typeof p.content === 'string') {
+        const textLines = p.content.split('\n')
+        firstLine = textLines[0] || ''
+        lastLine = textLines.filter(Boolean).pop() || ''
+        totalLines = textLines.length
+      } else {
+        firstLine = p.filename
+        lastLine = `${(p.size / 1024).toFixed(1)} KB`
+        totalLines = 1
+      }
+
+      return {
+        index: p.index,
+        filename: p.filename,
+        firstLine,
+        lastLine,
+        totalLines
+      }
+    })
 
     store.setPreviewParts(previewParts.value)
   } catch (err) {
@@ -122,6 +148,11 @@ async function onPreview() {
 
 function onPreviewConfirm() {
   showPreview.value = false
+  addEntry({
+    originalName: fileName.value,
+    criteria: criteria.value?.type ?? 'bySize',
+    partsCount: lastParts.length
+  })
   store.confirmParts(lastParts)
   store.clearSession()
   router.push('/downloads')
@@ -139,7 +170,7 @@ function onPreviewClose() {
       <p class="page-description">Divida arquivos de texto, legendas e PDF em múltiplas partes.</p>
 
       <DropZone :disabled="false" @file-selected="onFileSelected" />
-      <TextPasteArea v-model="fileContent" @text-pasted="onTextPasted" />
+      <TextPasteArea v-model="textValue" @text-pasted="onTextPasted" />
 
       <div class="page-actions">
         <AppButton variant="ghost" @click="onExampleClick">
