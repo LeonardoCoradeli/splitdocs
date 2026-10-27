@@ -2,7 +2,7 @@
   <div id="app" :class="{ 'dark-mode': isDark }">
     <AppHeader
       :is-dark="isDark"
-      lang="pt-BR"
+      :lang="locale"
       @toggle-dark="toggleDark"
       @toggle-lang="toggleLang"
     />
@@ -20,6 +20,7 @@
 import { useHead } from '@vueuse/head'
 import { useDarkMode } from '@/composables/useDarkMode'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useAppI18n } from '@/composables/useI18n'
 import { useSessionStore } from '@/stores/session'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppModal from '@/components/common/AppModal.vue'
@@ -42,9 +43,12 @@ useHead({
 
 const { isDark, toggle: toggleDark } = useDarkMode()
 const { error, clearError } = useErrorHandler()
+const { locale, setLocale } = useAppI18n()
 const sessionStore = useSessionStore()
 
-function toggleLang() {}
+function toggleLang() {
+  setLocale(locale.value === 'pt-BR' ? 'en' : 'pt-BR')
+}
 
 function onErrorClose() {
   clearError()
