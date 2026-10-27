@@ -1,7 +1,7 @@
 export interface Part {
   index: number
   filename: string
-  content: string
+  content: string | Uint8Array
   size: number
 }
 

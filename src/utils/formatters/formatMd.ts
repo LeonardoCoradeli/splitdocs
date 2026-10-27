@@ -11,9 +11,10 @@ export function formatMd(parts: Part[], originalBlocks?: Block[]): Part[] {
 
   return parts.map(part => {
     let text: string
+    const contentStr = typeof part.content === 'string' ? part.content : new TextDecoder().decode(part.content)
 
     if (hasCsvData) {
-      const rows = part.content.split('\n').map(line => {
+      const rows = contentStr.split('\n').map((line: string) => {
         try {
           const parsed = JSON.parse(line)
           if (Array.isArray(parsed)) return parsed
@@ -33,16 +34,16 @@ export function formatMd(parts: Part[], originalBlocks?: Block[]): Part[] {
 
       const headerRow = `| ${headers.join(' | ')} |`
       const separatorRow = `| ${headers.map(() => '---').join(' | ')} |`
-      const dataRows = rows.map(row =>
+      const dataRows = rows.map((row: string[]) =>
         `| ${row.map((v: string) => v.replace(/\|/g, '\\|')).join(' | ')} |`
       )
 
       text = [headerRow, separatorRow, ...dataRows].join('\n')
     } else if (hasTimestampBlocks) {
-      const lines = part.content.split('\n').map(line => `> ${line}`)
+      const lines = contentStr.split('\n').map((line: string) => `> ${line}`)
       text = lines.join('\n\n')
     } else {
-      text = part.content
+      text = contentStr
     }
 
     return {

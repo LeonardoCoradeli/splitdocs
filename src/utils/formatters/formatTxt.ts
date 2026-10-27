@@ -3,7 +3,8 @@ import type { Block } from '@/types/file'
 
 export function formatTxt(parts: Part[], _originalBlocks?: Block[]): Part[] {
   return parts.map(part => {
-    const lines = part.content.split('\n').map(line => {
+    const contentStr = typeof part.content === 'string' ? part.content : new TextDecoder().decode(part.content)
+    const lines = contentStr.split('\n').map((line: string) => {
       if (line.startsWith('{') || line.startsWith('[')) {
         try {
           const parsed = JSON.parse(line)
