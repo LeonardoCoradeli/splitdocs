@@ -20,8 +20,9 @@ onMounted(() => {
       class="adsbygoogle"
       style="display:block; width:300px; height:300px"
       data-ad-client="ca-pub-6961578288811450"
-      data-ad-slot="0000000000"
+      data-ad-slot="1145963572"
       data-ad-format="auto"
+      data-full-width-responsive="true"
     ></ins>
   </aside>
 </template>

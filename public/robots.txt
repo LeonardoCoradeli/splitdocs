@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dividir-documentos.centralutil.com.br/sitemap.xml
