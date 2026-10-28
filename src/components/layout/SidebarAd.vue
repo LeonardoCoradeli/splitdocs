@@ -18,9 +18,9 @@ onMounted(() => {
   <aside class="sidebar-ad">
     <ins
       class="adsbygoogle"
-      style="display:block; width:300px; height:300px"
+      style="display:block"
       data-ad-client="ca-pub-6961578288811450"
-      data-ad-slot="1145963572"
+      data-ad-slot="8832881903"
       data-ad-format="auto"
       data-full-width-responsive="true"
     ></ins>
@@ -30,10 +30,8 @@ onMounted(() => {
 <style scoped>
 .sidebar-ad {
   width: 300px;
-  min-height: 300px;
+  min-height: 600px;
   background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 </style>
