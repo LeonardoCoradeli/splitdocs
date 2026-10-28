@@ -10,6 +10,7 @@ import ptBR from './i18n/pt-BR.json'
 import en from './i18n/en.json'
 
 const i18n = createI18n({
+  legacy: false,
   locale: 'pt-BR',
   fallbackLocale: 'pt-BR',
   messages: { 'pt-BR': ptBR, en }
