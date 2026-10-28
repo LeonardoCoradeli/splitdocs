@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { useHead } from '@vueuse/head'
 import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
@@ -28,6 +28,10 @@ const totalSize = computed(() => store.accumulatedParts.reduce((sum, p) => sum +
 
 async function onDownload() {
   showAdModal.value = true
+  await nextTick()
+  try {
+    ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+  } catch {}
 }
 
 function onAdModalClose() {
@@ -113,8 +117,9 @@ function onRename(index: number, name: string) {
       class="adsbygoogle"
       style="display:block; width:100%; height:250px"
       data-ad-client="ca-pub-6961578288811450"
-      data-ad-slot="0000000000"
+      data-ad-slot="8832881903"
       data-ad-format="auto"
+      data-full-width-responsive="true"
     ></ins>
   </AppModal>
 </template>
